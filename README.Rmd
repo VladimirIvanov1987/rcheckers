@@ -1,0 +1,74 @@
+---
+title: "README"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# 🏁 Russian Checkers (Shashki) in R Shiny
+
+A fully functional implementation of the classic **Russian Checkers**
+board game, built entirely using **R** and the **Shiny** framework.
+
+This project demonstrates the capabilities of R beyond data analysis,
+implementing complex game logic, state management, and a reactive user
+interface.
+
+## ✨ Features
+
+-   **Game Rules**: Full implementation of Russian Checkers rules:
+    -   Mandatory captures (including backward captures).
+    -   "Flying Kings" (Dames).
+    -   Chain captures (multijump).
+-   **Game Modes**:
+    -   **PvP**: Player vs Player (Hotseat).
+    -   **PvE**: Player vs AI (Basic heuristic engine).
+-   **Interface**:
+    -   Clean, dark-themed UI using `bslib`.
+    -   Bilingual support: **English** and **Russian** (auto-switching).
+    -   Move history logging.
+
+## 🚀 How to Run
+
+You can run this application directly from RStudio.
+
+### Prerequisites
+
+Make sure you have R installed. You will need the `devtools` package to
+handle dependencies easily. r install.packages("devtools") \###
+Launching the App Clone this repository or download the source code,
+then run: r 📌 1. Install required packages (shiny, bslib, shinyjs,
+etc.)devtools::install_deps()
+
+📌 2. Load the package devtools::load_all()
+
+📌 3. Start the game run_app()
+
+## 🛠 Tech Stack
+
+-   **R Language**: Core logic.
+-   **Shiny**: Web application framework.
+-   **bslib**: Modern Bootstrap 5 theming.
+-   **shinyjs**: JavaScript integration for UI interactions.
+
+## 🗺 Roadmap & Future Improvements
+
+This project is currently in the **MVP (Minimum Viable Product)** stage.
+We are actively working on the following updates:
+
+-   **UI Performance**: Switching from full `renderUI` re-rendering to
+    **JavaScript-based updates** to eliminate screen flickering and
+    improve responsiveness.
+-   **AI Engine**: Upgrading the AI from a simple heuristic greedy
+    algorithm to a **Minimax algorithm with Alpha-Beta pruning** for
+    deeper strategic play.
+-   **Visuals**: Replacing CSS-based checkers with high-quality **SVG
+    assets** and adding smooth move animations.
+-   **Refactoring**: Separation of core logic from the UI layer for
+    better testability.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the
+[LICENSE](LICENSE) file for details.
