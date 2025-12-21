@@ -15,3 +15,5 @@ Imports:
     htmltools,
     shiny,
     shinyjs
+URL: https://github.com/VladimirIvanov1987/rcheckers
+BugReports: https://github.com/VladimirIvanov1987/rcheckers/issues
