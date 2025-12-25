@@ -1,12 +1,5 @@
 # tests/testthat/test-logic_moves.R
 
-# library(testthat)
-
-# Вспомогательная функция для создания пустой доски
-create_empty_board <- function() {
-  matrix(0, nrow = 8, ncol = 8)
-}
-
 # ============================================================================
 # ТЕСТЫ ДЛЯ get_all_quiet_moves (тихие ходы)
 # ============================================================================
@@ -36,7 +29,7 @@ test_that("Простая черная шашка ходит только впе
 test_that("Простая шашка не ходит, если клетки заняты", {
   board <- create_empty_board()
   board[6, 2] <- 1  # Белая простая
-  board[5, 1] <- 1  # Блокируем одно направление
+  board[5, 1] <- 2  # Блокируем одно направление
   board[5, 3] <- 2  # Блокируем второе направление
 
   moves <- get_all_quiet_moves(board, player = 1)
@@ -155,13 +148,10 @@ test_that("Запрещено бить одну шашку дважды", {
 
 test_that("Превращение в дамку при взятии с продолжением боя", {
   board <- create_empty_board()
-  board[2, 2] <- 1  # Белая простая
-  board[1, 3] <- 2  # Черная на последней линии, будем бить через нее
-  # На самом деле нужна такая позиция:
-  board <- create_empty_board()
   board[3, 3] <- 1  # Белая
-  board[2, 4] <- 2  # Бьем, попадаем на 1-ю линию
-  board[1, 7] <- 2  # И можем продолжить как дамка
+  board[2, 4] <- 2  # Черная
+  board[3, 7] <- 2  # Бьем, попадаем на 1-ю линию
+  board[6, 6] <- 2  # И можем продолжить как дамка
 
   moves <- get_all_capture_moves(board, player = 1)
 
@@ -300,13 +290,15 @@ test_that("Дамка в углу доски", {
 
 test_that("Нет легальных ходов", {
   board <- create_empty_board()
-  board[6, 2] <- 1  # Белая
+  board[6, 2] <- 1  # Белая - цель проверки
   board[5, 1] <- 1  # Блок
   board[5, 3] <- 1  # Блок
 
-  moves <- get_legal_moves(board, player = 1)
+  moves <- get_all_quiet_moves(board, player = 1)
+  moves_62 <- Filter(function(m) all(m$from == c(6, 2)), moves)
 
-  expect_equal(length(moves), 0)
+  # Ожидаем: 0 тихих ходов именно для этой шашки
+  expect_equal(length(moves_62), 0)
 })
 
 test_that("Превращение простой в дамку без взятия", {
