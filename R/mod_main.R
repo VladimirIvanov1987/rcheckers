@@ -77,9 +77,7 @@ rcheckers_ui <- function(id) {
   )
 }
 
-#' Game Module Server
-#' @param id Module ID
-#' @export
+
 #' Game Module Server
 #' @param id Module ID
 #' @export
