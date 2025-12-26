@@ -85,11 +85,6 @@ get_all_capture_moves <- function(board, player) {
     }
   }
 
-  # В русских шашках, если цепочка может быть продолжена, она ОБЯЗАНА быть продолжена.
-  # Наша рекурсия возвращает только завершенные цепочки.
-  # (Дополнительная фильтрация "самой длинной" не обязательна по правилам,
-  # но обязательна "завершенность", что алгоритм и делает).
-
   return(all_captures)
 }
 
@@ -168,11 +163,11 @@ find_capture_chains <- function(board, r, c, piece, player, captured_pos, start_
     }
     # --- ЛОГИКА ДЛЯ ДАМКИ ---
     else {
-      # Дамка сканирует диагональ
+      # --- ЛОГИКА ДЛЯ ДАМКИ (Flying King) ---
       found_enemy <- FALSE
       enemy_pos <- NULL
 
-      # Сканируем линию
+      # Сканируем диагональ
       for (dist in 1:7) {
         mr <- r + dr * dist
         mc <- c + dc * dist
@@ -181,53 +176,73 @@ find_capture_chains <- function(board, r, c, piece, player, captured_pos, start_
 
         p_here <- board[mr, mc]
 
-        # Если нашли свою фигуру - стоп
+        # 1. Уперлись в свою фигуру -> дальше хода нет
         if (get_piece_owner(p_here) == player) break
 
-        # Если нашли врага
+        # 2. Нашли фигуру противника
         if (get_piece_owner(p_here) == opponent) {
-          # Проверяем, не сбит ли уже
+          # Если уже нашли врага в этом направлении ранее - нельзя бить двоих подряд
+          if (found_enemy) break
+
+          # Проверка: не били ли мы эту шашку уже в этой цепочке?
           already_captured <- FALSE
           for (cp in captured_pos) {
             if (cp[1] == mr && cp[2] == mc) already_captured <- TRUE
           }
-
-          if (already_captured) break # Нельзя перепрыгивать дважды
-          if (found_enemy) break      # Нельзя бить двух подряд без паузы
+          if (already_captured) break # Нельзя прыгать через одну шашку дважды
 
           found_enemy <- TRUE
           enemy_pos <- c(mr, mc)
         }
+        # 3. Нашли пустую клетку
         else if (p_here == 0) {
-          # Пустая клетка
           if (found_enemy) {
-            # МЫ НАШЛИ ВРАГА И ТЕПЕРЬ ЗА НИМ ПУСТАЯ КЛЕТКА
-            # ЭТО ВАЛИДНОЕ МЕСТО ПРИЗЕМЛЕНИЯ
+            # Нашли врага, а теперь за ним пустая клетка (или несколько)
+            # Это возможная точка приземления.
 
             can_continue <- TRUE
             new_captured <- c(captured_pos, list(enemy_pos))
 
-            # ВАЖНО: Дамка может приземлиться здесь и продолжить бить
+            # Рекурсия: пробуем бить дальше с этой точки
             sub_moves <- find_capture_chains(board, mr, mc, piece, player, new_captured, start_pos)
+
+            # Собираем ВСЕ варианты (и короткие остановки, и длинные продолжения)
             moves_found <- c(moves_found, sub_moves)
 
-            # Но цикл не прерываем! Дамка может приземлиться и дальше по диагонали
+            # Важно: break НЕ делаем. Дамка может приземлиться на следующую пустую клетку тоже.
           }
         }
-      }
+      } # конец for dist
+    } # конец else (King logic)
+  } # конец for dir
+
+  # --- ФИНАЛЬНАЯ СБОРКА И ФИЛЬТРАЦИЯ (The Fix) ---
+
+  # 1. Если продолжений (moves_found) нет, но мы что-то сбили -> это конечная точка
+  if (length(moves_found) == 0) {
+    if (length(captured_pos) > 0) {
+      return(list(list(
+        from = start_pos,
+        to = c(r, c),
+        captures = captured_pos
+      )))
+    } else {
+      return(list()) # Пустой список, ничего не нашли
     }
   }
 
-  # Базовый случай рекурсии:
-  # Если мы сделали хотя бы одно взятие (captured_pos не пуст)
-  # И больше не можем продолжать (moves_found пуст), то текущая позиция - это конец хода.
-  if (length(moves_found) == 0 && length(captured_pos) > 0) {
-    return(list(list(
-      from = start_pos,
-      to = c(r, c),
-      captures = captured_pos
-    )))
-  }
+  # 2. ВАЖНЕЙШИЙ МОМЕНТ: Правило "Бить до конца"
+  # В moves_found могут быть:
+  # - Вариант А: Сбили 1 шашку, встали сразу за ней (тупик).
+  # - Вариант Б: Сбили 1 шашку, пролетели дальше, сбили 2-ю шашку.
+  # Мы должны вернуть ТОЛЬКО Вариант Б.
 
-  return(moves_found)
+  # Считаем длину цепочки взятий для каждого найденного варианта
+  lengths <- sapply(moves_found, function(m) length(m$captures))
+  max_len <- max(lengths)
+
+  # Оставляем только самые длинные цепочки
+  best_moves <- moves_found[lengths == max_len]
+
+  return(best_moves)
 }
