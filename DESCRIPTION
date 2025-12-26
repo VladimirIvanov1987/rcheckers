@@ -1,12 +1,12 @@
 Package: rcheckers
 Title: Russian Checkers Game
-Version: 0.0.0.9001
+Version: 0.1.0
 Authors@R: 
     person("Vladimir", "Ivanov", email = "Vlladdimmir@yandex.ru", role = c("aut", "cre"))
 Description: An implementation of Russian Checkers (Shashki) using the R Shiny framework.
     Features include a fully interactive game board, strict rule enforcement (including mandatory captures),
     support for both PvP (Player vs Player) and PvE (Player vs AI) modes, and a bilingual interface (English/Russian).
-License: MIT + file LICENSE
+License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
