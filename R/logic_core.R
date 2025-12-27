@@ -57,7 +57,7 @@ get_opponent <- function(player) {
   if (player == 1) return(2) else return(1)
 }
 
-# --- Манипуляции с состоянием (Append to R/logic_core.R) ---
+# --- Манипуляции с состоянием (Append to R/logic_core.R) ----
 
 #' Apply Move to Board
 #'
@@ -96,6 +96,11 @@ apply_move <- function(board, move) {
     piece <- 3 # White King
   } else if (is_black_man && r_end == 8) {
     piece <- 4 # Black King
+  } else if (!is.null(move$is_king)) {
+    if ((move$is_king==3 || move$is_king==4) && piece < 3) {
+      # Шашка не остановилась на поле превращения, а продолжила взятие как дамка
+      piece <- move$is_king
+    }
   }
 
   # 4. Ставим фигуру на новое место

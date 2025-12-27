@@ -1,6 +1,6 @@
 Package: rcheckers
 Title: Russian Checkers Game
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person("Vladimir", "Ivanov", email = "Vlladdimmir@yandex.ru", role = c("aut", "cre"))
 Description: An implementation of Russian Checkers (Shashki) using the R Shiny framework.
