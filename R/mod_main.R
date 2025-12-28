@@ -5,6 +5,35 @@ rcheckers_ui <- function(id) {
   ns <- NS(id)
 
   css <- "
+     .last-move-from {
+    background-color: rgba(106, 168, 79, 0.35) !important;
+    box-shadow: inset 0 0 8px rgba(106, 168, 79, 0.6);
+    animation: fadeIn 0.5s ease-in;
+    }
+
+    .last-move-to {
+    background-color: rgba(106, 168, 79, 0.5) !important;
+    box-shadow: inset 0 0 12px rgba(106, 168, 79, 0.8);
+    animation: fadeIn 0.5s ease-in;
+    }
+
+    .last-move-path {
+    background-color: rgba(106, 168, 79, 0.25) !important;
+    box-shadow: inset 0 0 6px rgba(106, 168, 79, 0.4);
+    animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+    }
+
   .board-container {
     display: grid;
     grid-template-columns: repeat(8, 50px);
@@ -85,6 +114,7 @@ rcheckers_server <- function(id) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    # === Рекативные переменные ====
     game <- reactiveValues(
       board = init_board(),
       turn = 1,
@@ -94,10 +124,17 @@ rcheckers_server <- function(id) {
       winner = NULL,
       score = c(0, 0),
       mode = "pvp",
-      force_update = 0  # Триггер для принудительного обновления
+      last_move = NULL,
+      force_update = 0,  # Триггер для принудительного обновления
+
+      # Счетчик тихих ходов. Для правил ничьи 5, 15, 30, 60 ходов
+      moves_quiet = 0,
+
+      # История позиций. Для проверки троекратного повторения позиции
+      position_history = list()
     )
 
-    # === КЛЮЧЕВОЕ: Observer для обновления клеток ===
+    # === Observer для обновления клеток ====
     observe({
       board <- game$board
       sel <- game$selected
@@ -116,6 +153,27 @@ rcheckers_server <- function(id) {
             # Определяем CSS классы
             cell_classes <- c("board-cell", "cell-dark")
 
+            if (!is.null(game$last_move)) {
+              # Начальная клетка (откуда)
+              if (game$last_move$from[1] == r && game$last_move$from[2] == c) {
+                cell_classes <- c(cell_classes, "last-move-from")
+              }
+              # Конечная клетка (куда) - более яркая
+              else if (game$last_move$to[1] == r && game$last_move$to[2] == c) {
+                cell_classes <- c(cell_classes, "last-move-to")
+              }
+              # Промежуточные клетки маршрута - самые тусклые
+              else if (!is.null(game$last_move$detail)) {
+                for (step in game$last_move$detail) {
+                  if (step[1] == r && step[2] == c) {
+                    cell_classes <- c(cell_classes, "last-move-path")
+                    break
+                  }
+                }
+              }
+            }
+
+
             # Подсветка выбранной клетки
             if (!is.null(sel) && sel[1] == r && sel[2] == c) {
               cell_classes <- c(cell_classes, "selected")
@@ -123,6 +181,29 @@ rcheckers_server <- function(id) {
 
             # Подсветка возможных ходов
             is_target <- FALSE
+
+            # Подсветка промежуточных шагов (detail)
+            is_path <- FALSE
+            if (!is.null(sel) && !is.null(moves)) {
+              for (m in moves) {
+                if (m$from[1] == sel[1] && m$from[2] == sel[2]) {
+                  if (!is.null(m$detail)) {
+                    for (step in m$detail) {
+                      if (step[1] == r && step[2] == c) {
+                        is_path <- TRUE
+                        break
+                      }
+                    }
+                  }
+                  if (is_path) break
+                }
+              }
+            }
+
+            if (is_path) {
+              cell_classes <- c(cell_classes, "highlight")  # Или создать новый класс "path-highlight"
+            }
+
             if (!is.null(sel) && !is.null(moves)) {
               for (m in moves) {
                 if (m$from[1] == sel[1] && m$from[2] == sel[2] &&
@@ -166,7 +247,7 @@ rcheckers_server <- function(id) {
       })
     })
 
-    # === Новая игра ===
+    # === Новая игра ====
     observeEvent(input$btn_new_game, {
       showModal(modalDialog(
         title = get_localization("app_title"),
@@ -191,7 +272,7 @@ rcheckers_server <- function(id) {
       removeModal()
     })
 
-    # === Инициализация при загрузке приложения ===
+    # === Инициализация при загрузке приложения ====
     observe({
       # Срабатывает один раз при старте сессии
       isolate({
@@ -201,9 +282,13 @@ rcheckers_server <- function(id) {
     }) %>%
       bindEvent(session$clientData$url_hostname, once = TRUE, ignoreInit = FALSE)
 
-    # === Клик по доске ===
+    # === Клик по доске =====
     observeEvent(input$board_click, {
       if (game$game_over) return()
+
+      if (!is.null(game$last_move) && game$turn == 1) {
+        game$last_move <- NULL
+      }
 
       coords <- as.numeric(strsplit(input$board_click, "_")[[1]])
       r <- coords[1]
@@ -239,6 +324,17 @@ rcheckers_server <- function(id) {
           game$board <- apply_move(game$board, move_to_apply)
           game$selected <- NULL
 
+          # Обновляем счетчик тихих ходов
+          if (length(move_to_apply$captures) > 0) {
+            game$moves_quiet <- 0  # Сброс при взятии
+          } else {
+            game$moves_quiet <- game$moves_quiet + 1
+          }
+
+          # Добавляем текущую позицию в историю
+          position_key <- paste(c(as.vector(game$board), game$turn), collapse = "")
+          game$position_history[[length(game$position_history) + 1]] <- position_key
+
           multi_jump_available <- FALSE
           if (length(move_to_apply$captures) > 0) {
             next_captures <- get_all_capture_moves(game$board, game$turn)
@@ -258,26 +354,56 @@ rcheckers_server <- function(id) {
           }
 
           if (!multi_jump_available) {
-            next_player <- get_opponent(game$turn)
-            status <- check_game_state(game$board, next_player)
+            # 1. Сначала проверяем условия ничьей
+            draw_check <- check_draw_conditions(game)
 
-            if (status != "active") {
+            if (draw_check$is_draw) {
+              # --- НИЧЬЯ ---
               game$game_over <- TRUE
-              game$winner <- status
-              if (status == "white_won") game$score[1] <- game$score[1] + 1
-              else game$score[2] <- game$score[2] + 1
+              game$winner <- "draw"
+
+              # Обновим счет
+              game$score <- game$score + 0.5
 
               showModal(modalDialog(
                 title = "Game Over",
-                paste(get_localization(paste0("status_", status))),
+                paste("Draw:", draw_check$reason), # Выводим причину (15 ходов, повтор и т.д.)
                 footer = modalButton("Close")
               ))
-            } else {
-              game$turn <- next_player
-              game$legal_moves <- get_legal_moves(game$board, next_player)
 
-              if (game$mode == "pve" && game$turn == 2) {
-                shinyjs::delay(500, run_ai_turn())
+            } else {
+              # --- НЕ НИЧЬЯ -> Идем по стандартному пути ---
+
+              next_player <- get_opponent(game$turn)
+              status <- check_game_state(game$board, next_player) # Проверяем, может ли ходить соперник
+
+              if (status != "active") {
+                # --- ПОБЕДА / ПОРАЖЕНИЕ ---
+                game$game_over <- TRUE
+                game$winner <- status
+
+                # ИСПРАВЛЕНИЕ: Безопасный подсчет очков
+                if (status == "white_won") {
+                  game$score[1] <- game$score[1] + 1
+                } else if (status == "black_won") {
+                  game$score[2] <- game$score[2] + 1
+                }
+
+                showModal(modalDialog(
+                  title = "Game Over",
+                  paste(get_localization(paste0("status_", status))),
+                  footer = modalButton("Close")
+                ))
+
+              } else {
+                # --- ИГРА ПРОДОЛЖАЕТСЯ ---
+                game$turn <- next_player
+                game$legal_moves <- get_legal_moves(game$board, next_player)
+
+                # Если сейчас ход ИИ
+                if (game$mode == "pve" && game$turn == 2) {
+                  shinyjs::delay(500, { run_ai_turn() })
+                }
               }
             }
           }
@@ -292,6 +418,10 @@ rcheckers_server <- function(id) {
 
       if (!is.null(ai_move)) {
         game$board <- apply_move(game$board, ai_move)
+
+        game$last_move <- list(from = ai_move$from, to = ai_move$to,
+                               detail = ai_move$detail)
+
         next_player <- 1
         status <- check_game_state(game$board, next_player)
 
@@ -299,7 +429,8 @@ rcheckers_server <- function(id) {
           game$game_over <- TRUE
           game$winner <- status
           game$score[2] <- game$score[2] + 1
-          showModal(modalDialog(title = "Game Over", "AI Wins!", footer = modalButton("Close")))
+          showModal(modalDialog(title = "Game Over", "AI Wins!",
+                                footer = modalButton("Close")))
         } else {
           game$turn <- next_player
           game$legal_moves <- get_legal_moves(game$board, next_player)
@@ -307,15 +438,20 @@ rcheckers_server <- function(id) {
       }
     }
 
+    # === Текс при завершении игры ====
     output$status_text <- renderText({
-      if (game$game_over) return(get_localization(paste0("status_", game$winner)))
-      if (game$turn == 1) get_localization("status_white_turn") else get_localization("status_black_turn")
+      if (game$game_over)
+        return(get_localization(paste0("status_", game$winner)))
+      if (game$turn == 1) get_localization("status_white_turn")
+      else get_localization("status_black_turn")
     })
 
+    #  === Счет ====
     output$score_text <- renderText({
       paste(get_localization("score_label"), ": ", game$score[1], " - ", game$score[2])
     })
 
+    # ==== Модальное окно о завершении игры ====
     observeEvent(input$btn_surrender, {
       if (game$game_over) return()
       loser <- game$turn
@@ -330,6 +466,7 @@ rcheckers_server <- function(id) {
       ))
     })
 
+    # === Предложение ничьи ====
     observeEvent(input$btn_offer_draw, {
       if (game$game_over) return()
       current_player <- game$turn
@@ -341,7 +478,8 @@ rcheckers_server <- function(id) {
         if (ai_pieces <= player_pieces) {
           game$game_over <- TRUE
           game$winner <- "draw"
-          showModal(modalDialog(title = "Game Over", "AI accepted the draw.", footer = modalButton("Close")))
+          showModal(modalDialog(title = "Game Over", "AI accepted the draw.",
+                                footer = modalButton("Close")))
         } else {
           showNotification("Computer refused the draw!", type = "warning")
         }
@@ -349,7 +487,8 @@ rcheckers_server <- function(id) {
         opponent_name <- if (current_player == 1) "Black" else "White"
         showModal(modalDialog(
           title = "Draw Offer",
-          paste0("Player ", current_player, " offers a draw. ", opponent_name, ", do you accept?"),
+          paste0("Player ", current_player, " offers a draw. ",
+                 opponent_name, ", do you accept?"),
           footer = tagList(
             actionButton(ns("btn_draw_accept"), "Accept"),
             modalButton("Decline")
@@ -362,7 +501,8 @@ rcheckers_server <- function(id) {
       removeModal()
       game$game_over <- TRUE
       game$winner <- "draw"
-      showModal(modalDialog(title = "Game Over", "Draw agreed!", footer = modalButton("Close")))
+      showModal(modalDialog(title = "Game Over", "Draw agreed!",
+                            footer = modalButton("Close")))
     })
   })
 }

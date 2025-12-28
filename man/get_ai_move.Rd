@@ -2,23 +2,25 @@
 % Please edit documentation in R/logic_ai.R
 \name{get_ai_move}
 \alias{get_ai_move}
-\title{Get Best Move for AI}
+\title{Get Best Move for AI (Heuristic Version)}
 \usage{
 get_ai_move(board, player)
 }
 \arguments{
 \item{board}{Current board}
 
-\item{player}{AI player color (usually 2)}
-}
-\value{
-A move object (list) or NULL if no moves
+\item{player}{AI player color (usually 2 - White in code logic usually moves "down" or depends on setup)}
 }
 \description{
-Currently implements a simple strategy:
+Strategy:
 \enumerate{
-\item Must capture if available.
-\item If multiple captures, picks the one removing most pieces.
-\item If quiet move, picks randomly (can be improved later).
+\item Mandatory Max Capture (Greedy).
+\item Heuristics for quiet moves:
+\itemize{
+\item Promote to King (+Score)
+\item Control Center (+Score)
+\item Keep Back Rank (+Score)
+\item Random noise (to vary gameplay)
+}
 }
 }
