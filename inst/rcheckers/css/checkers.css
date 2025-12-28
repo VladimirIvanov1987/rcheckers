@@ -1,0 +1,295 @@
+/* ============================================
+   PREMIUM 3D CHECKERS BOARD STYLES
+   ============================================ */
+
+/* === ANIMATIONS === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pieceClick {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes hexagonPulse {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* === LAST MOVE HIGHLIGHT === */
+.last-move-from {
+  background: radial-gradient(circle at center, rgba(255, 235, 59, 0.25), rgba(255, 235, 59, 0.1)) !important;
+  box-shadow: inset 0 0 12px rgba(255, 235, 59, 0.4), 0 3px 6px rgba(0,0,0,0.15);
+  animation: fadeIn 0.5s ease-in;
+}
+
+.last-move-to {
+  background: radial-gradient(circle at center, rgba(255, 235, 59, 0.35), rgba(255, 235, 59, 0.15)) !important;
+  box-shadow: inset 0 0 16px rgba(255, 235, 59, 0.5), 0 4px 8px rgba(0,0,0,0.2);
+  animation: fadeIn 0.5s ease-in;
+}
+
+.last-move-path {
+  background: radial-gradient(circle at center, rgba(255, 235, 59, 0.15), rgba(255, 235, 59, 0.05)) !important;
+  box-shadow: inset 0 0 8px rgba(255, 235, 59, 0.3), 0 2px 4px rgba(0,0,0,0.1);
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* === BOARD CONTAINER === */
+.board-container {
+  display: grid;
+  grid-template-columns: repeat(8, 60px);
+  grid-template-rows: repeat(8, 60px);
+  border: 8px solid #3e2723;
+  border-radius: 4px;
+  width: fit-content;
+  margin: 0 auto;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.5),
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    inset 0 0 20px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(145deg, #2c1810, #4e342e);
+  padding: 8px;
+}
+
+/* === BOARD CELLS === */
+.board-cell {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cell-light {
+  background: linear-gradient(145deg, #f5e6d3, #e8d4b8);
+  box-shadow:
+    inset 2px 2px 4px rgba(255,255,255,0.4),
+    inset -2px -2px 4px rgba(0,0,0,0.1);
+}
+
+.cell-dark {
+  background: linear-gradient(145deg, #c7a882, #a88f6f);
+  box-shadow:
+    inset 2px 2px 4px rgba(255,255,255,0.2),
+    inset -2px -2px 4px rgba(0,0,0,0.2);
+}
+
+.cell-dark:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 2px 2px 4px rgba(255,255,255,0.25),
+    inset -2px -2px 4px rgba(0,0,0,0.25),
+    0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* === CELL HIGHLIGHTS === */
+.selected {
+  background: radial-gradient(circle at center, #8b7355, #6d5d4a) !important;
+  box-shadow:
+    inset 0 0 20px rgba(255, 235, 59, 0.5),
+    0 0 15px rgba(255, 235, 59, 0.4),
+    0 4px 12px rgba(0,0,0,0.4) !important;
+  animation: hexagonPulse 1s ease-in-out infinite;
+}
+
+.highlight {
+  background: radial-gradient(circle at center, #8fa870, #7b9461) !important;
+  box-shadow:
+    inset 0 0 15px rgba(139, 195, 74, 0.6),
+    0 0 12px rgba(139, 195, 74, 0.5),
+    0 4px 10px rgba(0,0,0,0.3) !important;
+}
+
+/* === 3D PIECES === */
+.piece-container {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.piece {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.15s ease;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.board-cell:active .piece {
+  animation: pieceClick 0.3s ease;
+}
+
+/* === WHITE PIECES === */
+.piece-white {
+  background:
+    radial-gradient(circle at 30% 30%, #ffffff, #e8e8e8 50%, #c0c0c0);
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.4),
+    inset 0 2px 4px rgba(255, 255, 255, 0.8),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+    0 0 0 2px rgba(200, 200, 200, 0.3);
+  border: 2px solid #b8b8b8;
+}
+
+.piece-white::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 8px;
+  width: 15px;
+  height: 15px;
+  background: radial-gradient(circle, rgba(255,255,255,0.9), transparent);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* === BLACK PIECES === */
+.piece-black {
+  background:
+    radial-gradient(circle at 30% 30%, #4a4a4a, #2a2a2a 50%, #0a0a0a);
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.15),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+    0 0 0 2px rgba(80, 80, 80, 0.4);
+  border: 2px solid #1a1a1a;
+}
+
+.piece-black::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 8px;
+  width: 12px;
+  height: 12px;
+  background: radial-gradient(circle, rgba(255,255,255,0.2), transparent);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* === HEXAGON CENTER === */
+.hexagon {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.hexagon svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+}
+
+.piece-white .hexagon svg {
+  fill: url(#hexGradientWhite);
+  stroke: #999;
+  stroke-width: 0.5;
+}
+
+.piece-black .hexagon svg {
+  fill: url(#hexGradientBlack);
+  stroke: #666;
+  stroke-width: 0.5;
+}
+
+/* === KING CROWN === */
+.piece-king::after {
+  content: '♔';
+  position: absolute;
+  top: -8px;
+  font-size: 20px;
+  color: #ffd700;
+  text-shadow:
+    0 2px 4px rgba(0,0,0,0.5),
+    0 0 8px rgba(255, 215, 0, 0.6);
+  z-index: 20;
+  pointer-events: none;
+  animation: hexagonPulse 2s ease-in-out infinite;
+}
+
+/* === GAME INTERFACE === */
+.game-info {
+  text-align: center;
+  margin-bottom: 20px;
+  font-family: 'Georgia', serif;
+  color: #3e2723;
+}
+
+.game-info h3 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.game-info h4 {
+  font-size: 18px;
+  color: #5d4037;
+}
+
+.controls {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.controls button {
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(145deg, #6d4c41, #5d4037);
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  transition: all 0.2s ease;
+}
+
+.controls button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+  background: linear-gradient(145deg, #7d5c51, #6d4c41);
+}
+
+.controls button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* === SVG DEFINITIONS === */
+.svg-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}

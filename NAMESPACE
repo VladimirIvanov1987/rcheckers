@@ -2,6 +2,7 @@
 
 export("%>%")
 export(apply_move)
+export(check_draw_conditions)
 export(check_game_state)
 export(get_ai_move)
 export(get_legal_moves)
