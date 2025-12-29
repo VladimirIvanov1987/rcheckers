@@ -1,0 +1,326 @@
+/* === АНИМАЦИИ === */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes pieceClick {
+      0% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-5px) scale(1.05); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    @keyframes hexagonPulse {
+      0%, 100% { opacity: 0.9; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    /* === ПОДСВЕТКА ПОСЛЕДНЕГО ХОДА === */
+    .last-move-from {
+      background: radial-gradient(circle at center, rgba(106, 168, 79, 0.4), rgba(106, 168, 79, 0.2)) !important;
+      box-shadow: inset 0 0 15px rgba(106, 168, 79, 0.7), 0 4px 8px rgba(0,0,0,0.2);
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    .last-move-to {
+      background: radial-gradient(circle at center, rgba(106, 168, 79, 0.6), rgba(106, 168, 79, 0.3)) !important;
+      box-shadow: inset 0 0 20px rgba(106, 168, 79, 0.9), 0 6px 12px rgba(0,0,0,0.3);
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    .last-move-path {
+      background: radial-gradient(circle at center, rgba(106, 168, 79, 0.3), rgba(106, 168, 79, 0.15)) !important;
+      box-shadow: inset 0 0 10px rgba(106, 168, 79, 0.5), 0 2px 6px rgba(0,0,0,0.15);
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    /* === КОНТЕЙНЕР ДОСКИ === */
+   .board-container {
+      display: grid;
+      grid-template-columns: repeat(8, 60px);
+      grid-template-rows: repeat(8, 60px);
+      /* Усиленная рамка */
+      border: 10px solid #3e2723;
+      border-radius: 6px;
+      width: fit-content;
+      margin: 0 auto;
+      box-shadow:
+        /* Внешняя тень */
+        0 15px 40px rgba(0, 0, 0, 0.6),
+        0 25px 70px rgba(0, 0, 0, 0.4),
+        /* Внутренняя тень */
+        inset 0 0 25px rgba(0, 0, 0, 0.3),
+        /* НОВАЯ: эффект лакированного дерева */
+        inset 0 3px 6px rgba(255, 255, 255, 0.1);
+      background:
+        linear-gradient(145deg, #2c1810, #4e342e);
+      padding: 10px;
+      /* НОВАЯ: внешняя декоративная рамка */
+      outline: 2px solid rgba(139, 69, 19, 0.6);
+      outline-offset: 3px;
+    }
+
+    /* 2. ИНДИКАТОР АКТИВНОГО ИГРОКА */
+      .active-player-indicator {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 15px;
+        height: 15px;
+        background: #ffd700;
+        border-radius: 50%;
+        box-shadow:
+          0 0 10px rgba(255, 215, 0, 0.8),
+          0 0 20px rgba(255, 215, 0, 0.5);
+        animation: hexagonPulse 1.5s ease-in-out infinite;
+      }
+
+    /* === КЛЕТКИ ДОСКИ === */
+    .board-cell {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: all 0.2s ease;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .cell-light {
+      background: linear-gradient(145deg, #f5e6d3, #e8d4b8);
+      box-shadow:
+        inset 2px 2px 4px rgba(255,255,255,0.4),
+        inset -2px -2px 4px rgba(0,0,0,0.1);
+    }
+
+    .cell-dark {
+      background: linear-gradient(145deg, #c7a882, #a88f6f);
+      box-shadow:
+        inset 2px 2px 4px rgba(255,255,255,0.2),
+        inset -2px -2px 4px rgba(0,0,0,0.2);
+    }
+
+    .cell-dark:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        inset 2px 2px 4px rgba(255,255,255,0.25),
+        inset -2px -2px 4px rgba(0,0,0,0.25),
+        0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    /* === ПОДСВЕТКА ВЫБРАННОЙ КЛЕТКИ === */
+    .selected {
+      background: radial-gradient(circle at center, #8b7355, #6d5d4a) !important;
+      box-shadow:
+        inset 0 0 20px rgba(255, 235, 59, 0.5),
+        0 0 15px rgba(255, 235, 59, 0.4),
+        0 4px 12px rgba(0,0,0,0.4) !important;
+      animation: hexagonPulse 1s ease-in-out infinite;
+    }
+
+    .highlight {
+      background: radial-gradient(circle at center, #8fa870, #7b9461) !important;
+      box-shadow:
+        inset 0 0 15px rgba(139, 195, 74, 0.6),
+        0 0 12px rgba(139, 195, 74, 0.5),
+        0 4px 10px rgba(0,0,0,0.3) !important;
+    }
+
+    /* === ФИГУРЫ 3D === */
+    .piece-container {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .piece {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.15s ease;
+      cursor: pointer;
+      pointer-events: all;
+    }
+
+    .board-cell:active .piece {
+      animation: pieceClick 0.3s ease;
+    }
+
+    /* === БЕЛЫЕ ФИГУРЫ === */
+    .piece-white {
+       background: radial-gradient(circle at 30% 30%, #ffffff, #e8e8e8 50%, #c0c0c0);
+        box-shadow:
+          0 6px 12px rgba(0, 0, 0, 0.4),
+          inset 0 2px 4px rgba(255, 255, 255, 0.8),
+          inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+          0 0 0 2px rgba(200, 200, 200, 0.3),
+          /* НОВАЯ тень для контраста */
+          0 2px 6px rgba(0, 0, 0, 0.5);
+        border: 2px solid #b8b8b8;
+        /* НОВАЯ обводка */
+        outline: 1px solid rgba(0, 0, 0, 0.15);
+        outline-offset: -1px;
+    }
+
+    .piece-white::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 8px;
+      width: 15px;
+      height: 15px;
+      background: radial-gradient(circle, rgba(255,255,255,0.9), transparent);
+      border-radius: 50%;
+      color: #000000;
+      pointer-events: none;
+    }
+
+    /* === ЧЕРНЫЕ ФИГУРЫ === */
+    .piece-black {
+      background:
+        radial-gradient(circle at 30% 30%, #4a4a4a, #2a2a2a 50%, #0a0a0a);
+      box-shadow:
+        0 6px 12px rgba(0, 0, 0, 0.6),
+        inset 0 2px 4px rgba(255, 255, 255, 0.15),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+        0 0 0 2px rgba(80, 80, 80, 0.4);
+      border: 2px solid #1a1a1a;
+    }
+
+    .piece-black::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 8px;
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle, rgba(255,255,255,0.2), transparent);
+      color: #FFFFFF;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* === ШЕСТИГРАННИК В ЦЕНТРЕ === */
+    .hexagon {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      z-index: 10;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .hexagon svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+    }
+
+    .piece-white .hexagon svg {
+      fill: url(#hexGradientWhite);
+      stroke: #000000;
+      stroke-width: 1.5;
+    }
+
+    .piece-black .hexagon svg {
+      fill: url(#hexGradientBlack);
+      stroke: #FFFFFF;
+      stroke-width: 1.5;
+    }
+
+    /* === КОРОНА ДЛЯ ДАМОК === */
+    .piece-king::after {
+      content: '♔';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      color: #ffd700;
+      text-shadow:
+        0 2px 4px rgba(0,0,0,0.5),
+        0 0 8px rgba(255, 215, 0, 0.6);
+      z-index: 20;
+      pointer-events: none;
+      animation: hexagonPulse 2s ease-in-out infinite;
+    }
+
+    /* === ИНТЕРФЕЙС === */
+    .game-info {
+      text-align: center;
+      margin-bottom: 20px;
+      font-family: 'Georgia', serif;
+      color: #3e2723;
+    }
+
+    .game-info h3 {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .game-info h4 {
+      font-size: 18px;
+      color: #5d4037;
+    }
+
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .controls button {
+      padding: 10px 20px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: none;
+      background: linear-gradient(145deg, #6d4c41, #5d4037);
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: all 0.2s ease;
+    }
+
+    .controls button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+      background: linear-gradient(145deg, #7d5c51, #6d4c41);
+    }
+
+    .controls button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    /* === SVG ГРАДИЕНТЫ (скрытые) === */
+    .svg-defs {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }

@@ -6,6 +6,8 @@
 #' @export
 #' @import shiny
 run_app <- function() {
+  shiny::includeCSS(system.file("www", "style.css", package = "rcheckers"))
+
   ui <- shiny::fluidPage(
     theme = bslib::bs_theme(version = 5, bootswatch = "united"),
     title = "Russian Checkers",
