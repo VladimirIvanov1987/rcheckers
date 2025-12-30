@@ -14,7 +14,9 @@
 get_ai_move <- function(board, player) {
   moves <- get_legal_moves(board, player)
 
-  if (length(moves) == 0) return(NULL)
+  if (length(moves) == 0) {
+    return(NULL)
+  }
 
   # 1. Анализ взятий
   capture_counts <- sapply(moves, function(m) length(m$captures))
@@ -40,7 +42,7 @@ get_ai_move <- function(board, player) {
 
   # Определяем целевую строку для дамок
   target_row <- if (player == 1) 8 else 1
-  home_row   <- if (player == 1) 1 else 8
+  home_row <- if (player == 1) 1 else 8
 
   scores <- sapply(moves, function(m) {
     score <- 0
@@ -61,7 +63,7 @@ get_ai_move <- function(board, player) {
 
     # Фактор 3: Защита тыла (не уводить шашки с первой линии без нужды)
     if (r_from == home_row) {
-      score <- score - 15  # Штраф за вскрытие тыла
+      score <- score - 15 # Штраф за вскрытие тыла
     }
 
     # Фактор 4: Случайный шум (чтобы игры были разными)

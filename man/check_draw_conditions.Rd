@@ -4,10 +4,12 @@
 \alias{check_draw_conditions}
 \title{Check for Draw Conditions}
 \usage{
-check_draw_conditions(game)
+check_draw_conditions(game, lang = "en")
 }
 \arguments{
 \item{game}{The game object containing board, turn, and counters}
+
+\item{lang}{Language code for the output reason (e.g., "en", "ru")}
 }
 \value{
 list(is_draw = logical, reason = character)

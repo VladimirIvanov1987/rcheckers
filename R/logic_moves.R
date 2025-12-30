@@ -35,7 +35,7 @@ get_all_quiet_moves <- function(board, player) {
       if (get_piece_owner(piece) != player) next
 
       is_king <- (piece == 3 || piece == 4)
-      directions <- if (is_king) list(c(-1,-1), c(-1,1), c(1,-1), c(1,1)) else list(c(forward, -1), c(forward, 1))
+      directions <- if (is_king) list(c(-1, -1), c(-1, 1), c(1, -1), c(1, 1)) else list(c(forward, -1), c(forward, 1))
 
       if (is_king) {
         # Логика дамки: скольжение
@@ -251,7 +251,6 @@ get_all_capture_moves <- function(board, player) {
 # }
 find_capture_chains <- function(board, r, c, piece, player, captured_pos,
                                 start_pos = NULL, path = NULL, promotion_info = 0) {
-
   if (is.null(start_pos)) start_pos <- c(r, c)
   if (is.null(path)) path <- list(c(r, c))
 
@@ -298,13 +297,14 @@ find_capture_chains <- function(board, r, c, piece, player, captured_pos,
           new_captured <- c(captured_pos, list(c(mr, mc)))
           new_path <- c(path, list(c(nr, nc)))
 
-          sub_moves <- find_capture_chains(board, nr, nc, new_piece, player,
-                                           new_captured, start_pos, new_path, new_promotion_info)
+          sub_moves <- find_capture_chains(
+            board, nr, nc, new_piece, player,
+            new_captured, start_pos, new_path, new_promotion_info
+          )
           moves_found <- c(moves_found, sub_moves)
         }
       }
-    }
-    else {
+    } else {
       found_enemy <- FALSE
       enemy_pos <- NULL
 
@@ -326,15 +326,16 @@ find_capture_chains <- function(board, r, c, piece, player, captured_pos,
 
           found_enemy <- TRUE
           enemy_pos <- c(mr, mc)
-        }
-        else if (p_here == 0) {
+        } else if (p_here == 0) {
           if (found_enemy) {
             can_continue <- TRUE
             new_captured <- c(captured_pos, list(enemy_pos))
             new_path <- c(path, list(c(mr, mc)))
 
-            sub_moves <- find_capture_chains(board, mr, mc, piece, player,
-                                             new_captured, start_pos, new_path, promotion_info)
+            sub_moves <- find_capture_chains(
+              board, mr, mc, piece, player,
+              new_captured, start_pos, new_path, promotion_info
+            )
             moves_found <- c(moves_found, sub_moves)
           }
         }

@@ -43,8 +43,12 @@ is_on_board <- function(r, c) {
 #' @return 0 for empty, 1 for White (1,3), 2 for Black (2,4)
 #' @noRd
 get_piece_owner <- function(piece) {
-  if (piece == 0) return(0)
-  if (piece == 1 || piece == 3) return(1) # White
+  if (piece == 0) {
+    return(0)
+  }
+  if (piece == 1 || piece == 3) {
+    return(1)
+  } # White
   return(2) # Black
 }
 
@@ -54,7 +58,11 @@ get_piece_owner <- function(piece) {
 #' @return Integer (1 or 2)
 #' @export
 get_opponent <- function(player) {
-  if (player == 1) return(2) else return(1)
+  if (player == 1) {
+    return(2)
+  } else {
+    return(1)
+  }
 }
 
 # --- Манипуляции с состоянием (Append to R/logic_core.R) ----
@@ -97,7 +105,7 @@ apply_move <- function(board, move) {
   } else if (is_black_man && r_end == 8) {
     piece <- 4 # Black King
   } else if (!is.null(move$is_king)) {
-    if ((move$is_king==3 || move$is_king==4) && piece < 3) {
+    if ((move$is_king == 3 || move$is_king == 4) && piece < 3) {
       # Шашка не остановилась на поле превращения, а продолжила взятие как дамка
       piece <- move$is_king
     }
@@ -144,4 +152,3 @@ get_piece_owner <- function(x) {
   # 0->0, 1->1, 2->2, 3->1, 4->2
   ifelse(x == 0, 0, ifelse(x == 1 | x == 3, 1, 2))
 }
-
