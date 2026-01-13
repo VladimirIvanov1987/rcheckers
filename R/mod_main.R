@@ -338,7 +338,7 @@ rcheckers_server <- function(id) {
         if (can_select) {
           game$selected <- c(r, c)
         } else {
-          # !!! ЗДЕСЬ ИЗМЕНЕНО СООБЩЕНИЕ !!!
+
           showNotification(tr("error_must_capture", lang),
             type = "warning", duration = 2
           )
@@ -373,25 +373,26 @@ rcheckers_server <- function(id) {
 
           multi_jump_available <- FALSE
 
-          # Проверка на серию взятий (мульти-прыжок)
-          if (length(move_to_apply$captures) > 0) {
-            next_captures <- get_all_capture_moves(game$board, game$turn)
-            this_piece_captures <- list()
-            for (nm in next_captures) {
-              if (nm$from[1] == move_to_apply$to[1] && nm$from[2] == move_to_apply$to[2]) {
-                this_piece_captures[[length(this_piece_captures) + 1]] <- nm
-              }
-            }
+          # # Проверка на серию взятий (мульти-прыжок)
+          # if (length(move_to_apply$captures) > 0) {
+          #   next_captures <- get_all_capture_moves(game$board, game$turn)
+          #   this_piece_captures <- list()
+          #   for (nm in next_captures) {
+          #     if (nm$from[1] == move_to_apply$to[1] && nm$from[2] == move_to_apply$to[2]) {
+          #       this_piece_captures[[length(this_piece_captures) + 1]] <- nm
+          #     }
+          #   }
+          #
+          #   if (length(this_piece_captures) > 0) {
+          #     multi_jump_available <- TRUE
+          #     game$legal_moves <- this_piece_captures
+          #     game$selected <- move_to_apply$to
+          #     # Локализованное сообщение про мульти-прыжок
+          #     showNotification(tr("msg_multi_jump", lang), type = "message")
+          #   }
+          # }
 
-            if (length(this_piece_captures) > 0) {
-              multi_jump_available <- TRUE
-              game$legal_moves <- this_piece_captures
-              game$selected <- move_to_apply$to
-              # Локализованное сообщение про мульти-прыжок
-              showNotification(tr("msg_multi_jump", lang), type = "message")
-            }
-          }
-
+          multi_jump_available <- FALSE
           if (!multi_jump_available) {
             # Проверка условий ничьей
             draw_check <- check_draw_conditions(game, lang)

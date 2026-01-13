@@ -18,5 +18,6 @@ Imports:
 URL: https://github.com/VladimirIvanov1987/rcheckers
 BugReports: https://github.com/VladimirIvanov1987/rcheckers/issues
 Suggests: 
+    pkgload,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
