@@ -1,0 +1,13 @@
+name: rcheckers
+title: rcheckers
+username: vladimirivanov1987
+account: vladimirivanov1987
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16366645
+bundleId: 11392144
+url: https://vladimirivanov1987.shinyapps.io/rcheckers/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .Rbuildignore|tests/testthat/helper.R|tests/testthat/test-logic_moves.R|tests/testthat.R

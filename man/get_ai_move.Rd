@@ -2,25 +2,20 @@
 % Please edit documentation in R/logic_ai.R
 \name{get_ai_move}
 \alias{get_ai_move}
-\title{Get Best Move for AI (Heuristic Version)}
+\title{Get AI Move}
 \usage{
-get_ai_move(board, player)
+get_ai_move(board, player, level = 3)
 }
 \arguments{
-\item{board}{Current board}
+\item{board}{Matrix 8x8}
 
-\item{player}{AI player color (usually 2 - White in code logic usually moves "down" or depends on setup)}
+\item{player}{1 (White) or 2 (Black)}
+
+\item{level}{AI difficulty: 1 (Beginner), 2 (Amateur), 3 (Advanced)}
+}
+\value{
+Selected move object
 }
 \description{
-Strategy:
-\enumerate{
-\item Mandatory Max Capture (Greedy).
-\item Heuristics for quiet moves:
-\itemize{
-\item Promote to King (+Score)
-\item Control Center (+Score)
-\item Keep Back Rank (+Score)
-\item Random noise (to vary gameplay)
-}
-}
+Main entry point for AI move selection
 }
